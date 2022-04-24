@@ -108,7 +108,7 @@ export default async (youtube, notif = false) => {
         ),
       });
 
-      if (!past_upcoming && !is_live && past_update) continue;
+      if (!past_upcoming && !is_live && !past_update) continue;
 
       // get video data
       const video_data = await getVideo(video.id, video.from, youtube);
@@ -247,6 +247,8 @@ async function getVideo(video_id, slug, youtube) {
     .catch(err => {
       // when video is not found
       if (err.status === 404) return false;
+      else if (err.errors[0]?.reason === "quotaExceeded")
+        throw new Error(err.errors[0]?.reason);
       else throw new Error(err);
     });
 

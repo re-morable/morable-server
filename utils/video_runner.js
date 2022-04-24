@@ -18,10 +18,7 @@ export default async () => {
     );
     await fetchVideos(youtube);
   } catch (error) {
-    if (
-      error.errors?.length > 0 &&
-      error.errors[0]?.reason === "quotaExceeded"
-    ) {
+    if (error.message == "quotaExceeded") {
       console.log(
         chalk.red.bold.inverse(" 🤐 Quota exceeded, get new token! ")
       );
@@ -40,10 +37,7 @@ export default async () => {
       );
       await fetchVideos(youtube, true);
     } catch (error) {
-      if (
-        error.errors?.length > 0 &&
-        error.errors[0]?.reason === "quotaExceeded"
-      ) {
+      if (error.message == "quotaExceeded") {
         console.log();
         console.log(
           chalk.red.bold.inverse(" 🤐 Quota exceeded, get new token! ")
