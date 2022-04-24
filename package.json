@@ -3,8 +3,31 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "type": "module",
+  "engines": {
+    "node": "16.*"
+  },
   "scripts": {
-    "dev": "nodemon"
+    "dev": "nodemon",
+    "serve": "node ."
+  },
+  "dependencies": {
+    "axios": "^0.26.1",
+    "chalk": "^5.0.1",
+    "chalk-animation": "^2.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.0",
+    "express": "^4.17.3",
+    "figlet": "^1.5.2",
+    "firebase-admin": "^10.1.0",
+    "google-auth-library": "^7.14.1",
+    "googleapis": "^99.0.0",
+    "gradient-string": "^2.0.1",
+    "inquirer": "^8.2.2",
+    "moment": "^2.29.1",
+    "nanospinner": "^1.1.0",
+    "rss-parser": "^3.12.0",
+    "sharp": "^0.30.4"
   },
   "keywords": [],
   "author": "",
