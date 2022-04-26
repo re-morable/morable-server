@@ -239,5 +239,6 @@ $RECYCLE.BIN/
 
 # End of https://www.toptal.com/developers/gitignore/api/Node,VisualStudioCode,windows,linux,macos
 config/token.json
+config/token.txt
 config/firebase-admin.json
 members/

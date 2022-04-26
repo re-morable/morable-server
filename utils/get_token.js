@@ -2,21 +2,22 @@ import { createSpinner } from "nanospinner";
 import { google } from "googleapis";
 import chalk from "chalk";
 
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __rootname = path.dirname(__filename) + "/../";
+import {
+  readFileSync,
+  writeFileSync,
+  __rootname,
+  existsSync,
+  join,
+} from "./io.js";
 
 export default async () => {
   const spinner = createSpinner(
     chalk.blue.bold.inverse(" Find token.json ")
   ).start();
 
-  const token_json = path.join(__rootname, "config/token.json");
+  const token_json = join(__rootname, "config/token.json");
 
-  if (!fs.existsSync(token_json)) {
+  if (!existsSync(token_json)) {
     spinner.error({
       text: chalk.red.bold.inverse(" 😥 token.json file not found! "),
     });
@@ -24,7 +25,7 @@ export default async () => {
   }
 
   // read tokens in array
-  const tokens = JSON.parse(fs.readFileSync(token_json, "utf8"));
+  const tokens = JSON.parse(readFileSync(token_json, "utf8"));
   let token_api = null;
 
   // loop tokens with index
@@ -64,5 +65,8 @@ export default async () => {
   }
 
   spinner.success({ text: chalk.green.bold.inverse(" 😄 Token found! ") });
-  return token_api;
+
+  // create token.txt
+  const token_txt = join(__rootname, "config/token.txt");
+  writeFileSync(token_txt, token_api);
 };

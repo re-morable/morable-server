@@ -1,4 +1,5 @@
 import { Router } from "express";
+import add_collab from "../../utils/add_collab.js";
 import {
   existsSync,
   writeFileSync,
@@ -6,17 +7,18 @@ import {
   join,
   __rootname,
 } from "../../utils/io.js";
+
 const router = Router();
 
 router.get("/", (req, res) => {});
-router.post("/", (req, res) => {
-  const { id, url, member } = req.body;
+router.post("/", async (req, res) => {
+  const { id, url, notification } = req.body;
 
   // data is null
-  if ((!id || !url) && !member) {
+  if (!id && !url) {
     res.status(400).send({
       status: "error",
-      message: "Please provide id/url youtube and member slug",
+      message: "Please provide id/url youtube video",
     });
   }
 
@@ -51,46 +53,22 @@ router.post("/", (req, res) => {
 
   // get youtube id from url
   const youtubeId = id ? id : url.replace(isYoutubeUrl, "$1");
-  console.log(youtubeId);
 
-  // check member slug is string or array
-  const members = typeof member === "string" ? [member] : member;
+  const data = await add_collab(youtubeId, notification);
 
-  // get slug member from config/members.js
-  const slugs = JSON.parse(
-    readFileSync(join(__rootname, "config/members.json"))
-  ).map(member => member.slug);
-
-  for (const member of members) {
-    if (!slugs.includes(member)) {
-      return res.status(400).send({
-        status: "error",
-        message: `${member} is not members of Re:memories`,
-      });
-    }
+  if (typeof data === "string") {
+    // show error
+    return res.status(400).send({
+      status: "error",
+      message: data,
+    });
   }
-
-  // create config/collab.json when not found
-  const collab_json = join(__rootname, "config/collab.json");
-
-  if (!existsSync(collab_json)) {
-    writeFileSync(collab_json, "[]");
-  }
-
-  // read config/collab.json
-  const collab = JSON.parse(readFileSync(collab_json, "utf8"));
-
-  // push data to collab.json
-  collab.push({ id: youtubeId, to: members });
-
-  // write collab.json
-  writeFileSync(collab_json, JSON.stringify(collab));
 
   // status when post success
   res.status(201).json({
     status: "success",
     message: "Collab added",
-    data: { id: youtubeId, to: members },
+    data,
   });
 });
 

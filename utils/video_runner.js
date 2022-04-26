@@ -1,28 +1,27 @@
 import chalk from "chalk";
 import get_token from "./get_token.js";
-import fetchVideos from "./fetch_videos.js";
+import fetchVideos from "./fetch_members.js";
+import checkCollab from "./check_collab.js";
 
 const sleep = async (ms = 1000) =>
   await new Promise(resolve => setTimeout(resolve, ms));
 
-import { google } from "googleapis";
-
-let youtube;
-
 export default async () => {
-  youtube = await getYouTubeToken();
+  await get_token();
   try {
     console.log(
       chalk.yellow.inverse.bold(` ${new Date().toLocaleString()} `) +
         chalk.blue.inverse.bold(` 🔍 Get data... `)
     );
-    await fetchVideos(youtube);
+
+    await fetchVideos();
+    await checkCollab();
   } catch (error) {
     if (error.message == "quotaExceeded") {
       console.log(
         chalk.red.bold.inverse(" 🤐 Quota exceeded, get new token! ")
       );
-      youtube = getYouTubeToken(youtube);
+      get_token();
     } else {
       console.log(chalk.red.bold.inverse(" 😥 Error: "), error.message);
       console.log(error);
@@ -35,14 +34,15 @@ export default async () => {
         chalk.yellow.inverse.bold(` ${new Date().toLocaleString()} `) +
           chalk.blue.inverse.bold(" 🔍 Refresh data... ")
       );
-      await fetchVideos(youtube, true);
+      await fetchVideos(true);
+      await checkCollab();
     } catch (error) {
       if (error.message == "quotaExceeded") {
         console.log();
         console.log(
           chalk.red.bold.inverse(" 🤐 Quota exceeded, get new token! ")
         );
-        youtube = getYouTubeToken();
+        get_token();
       } else {
         console.log();
         console.log(chalk.red.bold.inverse(" 😥 Error: "), error.message);
@@ -51,11 +51,3 @@ export default async () => {
     }
   }, 1000 * 60);
 };
-
-// check api limit
-async function getYouTubeToken() {
-  return google.youtube({
-    version: "v3",
-    auth: await get_token(),
-  });
-}

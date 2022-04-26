@@ -10,6 +10,8 @@ import {
   mkdirSync,
 } from "./io.js";
 
+import getVideo from "./fetch_video/get_data_video.js";
+
 import { app } from "./init_firebase.js";
 import { getFirestore } from "firebase-admin/firestore";
 const db = getFirestore(app);
@@ -21,7 +23,7 @@ const parser = new Parser();
 const sleep = async (ms = 1000) =>
   await new Promise(resolve => setTimeout(resolve, ms));
 
-export default async (youtube, notif = false) => {
+export default async (notif = false) => {
   const spinner = createSpinner();
 
   // create members folder
@@ -111,7 +113,10 @@ export default async (youtube, notif = false) => {
       if (!past_upcoming && !is_live && !past_update) continue;
 
       // get video data
-      const video_data = await getVideo(video.id, video.from, youtube);
+      const video_data = await getVideo({
+        video_id: video.id,
+        slug: video.from,
+      });
 
       // check when video_data return null and pop
       if (!video_data) {
@@ -164,7 +169,10 @@ export default async (youtube, notif = false) => {
       if (video_exist) continue;
 
       // get video data
-      const video_data = await getVideo(video.id, video.slug, youtube);
+      const video_data = await getVideo({
+        video_id: video.id,
+        slug: video.slug,
+      });
 
       // check when video_data return null
       if (!video_data) continue;
@@ -172,16 +180,16 @@ export default async (youtube, notif = false) => {
       // check live status
       switch (video_data.live_status) {
         case "upcoming":
-          const time_remain =
-            moment(video_data.live?.start_stream).isAfter(
-              new Date().getTime()
-            ) - new Date().getTime()
-              ? moment(video_data.live.start_time).toNow()
-              : "few moments";
+          // compile start_stream to time now
+          const time_remain = moment(video_data.live.start_stream).isBefore(
+            Date.now()
+          )
+            ? "in few moments"
+            : moment(video_data.live.start_stream).fromNow();
           spinner.clear();
           console.log(
             chalk.blue.inverse.bold(
-              ` 🎬 Staring in ${time_remain} ${member.emoji} `
+              ` 🎬 Staring ${time_remain} ${member.emoji} `
             ) + video_data.title
           );
           spinner.start();
@@ -211,7 +219,6 @@ export default async (youtube, notif = false) => {
       // push video data
       data.push(video_data);
     }
-
     // sorting data by start_stream (when exist) or published
     data.sort((a, b) => {
       if (a.live?.start_stream && b.live?.start_stream) {
@@ -224,80 +231,14 @@ export default async (youtube, notif = false) => {
         return b.published - a.published;
       }
     });
-    // limit data to 50
-    data = data.slice(0, 50);
+    // limit data to 30
+    data = data.slice(0, 30);
     // save to (slug).json
     writeFileSync(data_json, JSON.stringify(data));
   }
-
   spinner.success({
-    text: chalk.green.bold(` 🎉 Done! ${new Date().toLocaleString()} `),
+    text: chalk.green.bold(
+      ` 🎉 All member success fetched (${new Date().toLocaleString()}) `
+    ),
   });
 };
-
-async function getVideo(video_id, slug, youtube) {
-  const video = await youtube.videos
-    .list({
-      id: video_id,
-      part: "statistics,snippet,liveStreamingDetails,contentDetails",
-      fields:
-        "items(snippet(publishedAt,title,channelTitle,liveBroadcastContent),liveStreamingDetails(scheduledStartTime,actualStartTime,actualEndTime),statistics(viewCount),contentDetails(duration))",
-    })
-    .then(data => data.data.items[0])
-    .catch(err => {
-      // when video is not found
-      if (err.status === 404) return false;
-      else if (err.errors[0]?.reason === "quotaExceeded")
-        throw new Error(err.errors[0]?.reason);
-      else throw new Error(err);
-    });
-
-  if (!video) return null;
-
-  const published = new Date(video.snippet.publishedAt).getTime();
-  const duration = convertToSeconds(video.contentDetails.duration);
-
-  const update_time = new Date().getTime();
-
-  const live = video.liveStreamingDetails
-    ? {
-        live: {
-          start_stream: new Date(
-            video.liveStreamingDetails.actualStartTime
-              ? video.liveStreamingDetails.actualStartTime
-              : video.liveStreamingDetails.scheduledStartTime
-          ).getTime(),
-          end_stream: video.liveStreamingDetails.actualEndTime
-            ? new Date(video.liveStreamingDetails.actualEndTime).getTime()
-            : null,
-        },
-      }
-    : null;
-
-  return {
-    id: video_id,
-    title: video.snippet.title,
-    published,
-    from: slug,
-    duration,
-    update_time,
-    live_status: video.snippet.liveBroadcastContent,
-    ...live,
-  };
-}
-
-function convertToSeconds(time) {
-  const reptms = /^PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/;
-  const matches = reptms.exec(time);
-
-  let totalseconds;
-  if (matches === null) totalseconds = 0;
-  else {
-    const hours = parseInt(matches[1] ?? 0);
-    const minutes = parseInt(matches[2] ?? 0);
-    const seconds = parseInt(matches[3] ?? 0);
-    totalseconds = hours * 3600 + minutes * 60 + seconds;
-  }
-
-  return totalseconds;
-}

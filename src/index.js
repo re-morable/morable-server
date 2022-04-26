@@ -1,9 +1,11 @@
 import express from "express";
+import "dotenv/config";
 import sharp from "sharp";
 import axios from "axios";
 
 // routes
 import collab from "./routes/collab.js";
+import chalk from "chalk";
 
 const app = express();
 
@@ -32,8 +34,10 @@ const server = () => {
   // routes collab
   app.use("/collab", collab);
 
-  app.listen(3000, () => {
-    console.log("Example app listening on port 3000!");
+  app.listen(process.env.PORT, () => {
+    console.log(
+      chalk.green.bold(`✔️ 🚀 Server is running on port ${process.env.PORT} `)
+    );
   });
 };
 
