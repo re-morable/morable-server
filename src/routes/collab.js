@@ -68,7 +68,12 @@ router.post("/", async (req, res) => {
   res.status(201).json({
     status: "success",
     message: "Collab added",
-    data,
+    data: {
+      id: data.id,
+      title: data.title,
+      from: data.from,
+      to: data.to,
+    },
   });
 });
 

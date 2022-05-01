@@ -36,7 +36,7 @@ const server = () => {
 
   app.listen(process.env.PORT, () => {
     console.log(
-      chalk.green.bold(`✔️ 🚀 Server is running on port ${process.env.PORT} `)
+      chalk.green.bold(`✔  🚀 Server is running on port ${process.env.PORT} `)
     );
   });
 };

@@ -7,17 +7,11 @@
     "gen": 0
   },
   {
-    "slug": "evelyn",
-    "name": "Evelyn Vtuber",
-    "id": "UCMxxFFeuhFQ30quuePTym0A",
-    "emoji": "💙",
-    "gen": 1
-  },
-  {
-    "slug": "chloe",
-    "name": "Chloe Pawapua",
-    "id": "UCrKS2bOUZDXA_R3qhCux7ow",
-    "emoji": "🍀",
+    "slug": "lily",
+    "name": "Lily Ifeta",
+    "id": "UCXSbl3XQYtx1u4Gvvca7NUA",
+    "emoji": "💫",
+    "birthday": "September 9",
     "gen": 2
   },
   {
@@ -25,13 +19,15 @@
     "name": "Reynard Blanc",
     "id": "UCoUFv7APM1XOo4TUaWbRekw",
     "emoji": "🎹",
+    "birthday": "March 1",
     "gen": 2
   },
   {
-    "slug": "lily",
-    "name": "Lily Ifeta",
-    "id": "UCXSbl3XQYtx1u4Gvvca7NUA",
-    "emoji": "💫",
+    "slug": "chloe",
+    "name": "Chloe Pawapua",
+    "id": "UCrKS2bOUZDXA_R3qhCux7ow",
+    "emoji": "🍀",
+    "birthday": "February 29",
     "gen": 2
   },
   {
